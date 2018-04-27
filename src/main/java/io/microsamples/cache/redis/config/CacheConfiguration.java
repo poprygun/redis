@@ -57,7 +57,7 @@ public class CacheConfiguration extends CachingConfigurerSupport {
     @Bean
     public CacheManager cacheManager(RedisTemplate redisTemplate) {
         RedisCacheManager rcm = new RedisCacheManager(redisTemplate);
-        rcm.setDefaultExpiration(60);
+        rcm.setDefaultExpiration(600); //<-- expire cache every 10 minutes
         return rcm;
     }
 

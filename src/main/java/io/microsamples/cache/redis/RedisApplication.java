@@ -2,6 +2,7 @@ package io.microsamples.cache.redis;
 
 import io.microsamples.cache.redis.service.DaysService;
 import io.microsamples.cache.redis.service.MonthsService;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.SpringApplication;
@@ -11,6 +12,7 @@ import org.springframework.cache.CacheManager;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -22,6 +24,7 @@ import java.util.Map;
 import java.util.Set;
 
 @SpringBootApplication
+@Slf4j
 public class RedisApplication {
 
     public static void main(String[] args) {
@@ -30,6 +33,8 @@ public class RedisApplication {
 
     @RestController
     public class RedisApi {
+
+        private final static String CACHE_SUFFIX = "~keys";
 
         private MonthsService monthsService;
 
@@ -70,15 +75,14 @@ public class RedisApplication {
 
             Map<String, String> cachedData = new HashMap<>();
 
-            for (String key : range) {
-                cachedData.put(key, redisTemplate.opsForValue().get(key).toString());
-            }
+            if (!CollectionUtils.isEmpty(range))
+                range.stream().forEach(v -> cachedData.put(v, redisTemplate.opsForValue().get(v).toString()));
 
             return new ResponseEntity<>(cachedData, HttpStatus.OK);
         }
 
         private Set<String> namedCacheValues(@RequestParam String cacheName) {
-            String keyName = cacheName.concat("~keys");
+            String keyName = cacheName.concat(CACHE_SUFFIX);
             long cachedSize = keyRedisTemplate.opsForZSet().size(keyName);
             return keyRedisTemplate.opsForZSet().range(keyName, 0, cachedSize);
         }
@@ -94,7 +98,8 @@ public class RedisApplication {
 
             Set<String> range = namedCacheValues(cacheName);
 
-            range.stream().forEach(v -> cache.evict(v));
+            if (!CollectionUtils.isEmpty(range))
+                range.stream().forEach(v -> cache.evict(v));
 
             return new ResponseEntity(range.size(), HttpStatus.OK);
         }
