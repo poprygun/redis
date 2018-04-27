@@ -23,4 +23,8 @@ zset
 1) "{\"className\":\"class io.microsamples.cache.redis.service.MonthsService\",\"method\":\"public java.util.List io.microsamples.cache.redis.service.MonthsService.springMonths()\",\"params\":[]}"
 ```
 
+Namespace key values are of different type then actual @Cacheable data, therefore,
+I needed to created an extra RedisTemplate to manipulate these keys - keyRedisTemplate using `StringRedisSerializer`
+vs redisTemlate, using GenericJackson2JsonRedisSerializer for values.
+
 Inspiration is taken from [this example](https://github.com/michaelcgood/spring-data-redis-example).
