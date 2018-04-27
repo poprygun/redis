@@ -1,5 +1,6 @@
 package io.microsamples.cache.redis;
 
+import io.microsamples.cache.redis.service.DaysService;
 import io.microsamples.cache.redis.service.MonthsService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -10,7 +11,9 @@ import org.springframework.cache.CacheManager;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.HashMap;
@@ -27,9 +30,10 @@ public class RedisApplication {
 
     @RestController
     public class RedisApi {
-        private final String CACHE_NAME = "months";
 
         private MonthsService monthsService;
+
+        private DaysService daysService;
 
         @Autowired
         private RedisTemplate<String, Object> redisTemplate;
@@ -41,21 +45,28 @@ public class RedisApplication {
         @Autowired
         private CacheManager cacheManager;
 
-        public RedisApi(MonthsService monthsService) {
+        public RedisApi(MonthsService monthsService, DaysService daysService) {
             this.monthsService = monthsService;
+            this.daysService = daysService;
         }
 
-        @GetMapping("/")
+        @GetMapping("/months")
         public ResponseEntity<List<String>> months() {
             return new ResponseEntity<>(monthsService.springMonths(), HttpStatus.OK);
         }
 
-        @GetMapping("/cached")
-        public ResponseEntity<Map> index() {
-            String keyName = CACHE_NAME.concat("~keys");
+        @GetMapping("/days")
+        public ResponseEntity<List<String>> days() {
+            return new ResponseEntity<>(daysService.daysOfWeek(), HttpStatus.OK);
+        }
 
-            long cachedSize = keyRedisTemplate.opsForZSet().size(keyName);
-            Set<String> range = keyRedisTemplate.opsForZSet().range(keyName, 0, cachedSize);
+        @GetMapping("/cached")
+        public ResponseEntity<Map> index(@RequestParam String cacheName) {
+
+            if (StringUtils.isEmpty(cacheName))
+                return new ResponseEntity("Cache name needs to be provided.", HttpStatus.BAD_REQUEST);
+
+            Set<String> range = namedCacheValues(cacheName);
 
             Map<String, String> cachedData = new HashMap<>();
 
@@ -66,14 +77,26 @@ public class RedisApplication {
             return new ResponseEntity<>(cachedData, HttpStatus.OK);
         }
 
+        private Set<String> namedCacheValues(@RequestParam String cacheName) {
+            String keyName = cacheName.concat("~keys");
+            long cachedSize = keyRedisTemplate.opsForZSet().size(keyName);
+            return keyRedisTemplate.opsForZSet().range(keyName, 0, cachedSize);
+        }
+
 
         @GetMapping("/purge")
-        public ResponseEntity purge() {
+        public ResponseEntity<Long> purge(@RequestParam String cacheName) {
 
-            Cache cache = cacheManager.getCache(CACHE_NAME);
-            cache.clear();
+            if (StringUtils.isEmpty(cacheName))
+                return new ResponseEntity("Cache name needs to be provided.", HttpStatus.BAD_REQUEST);
 
-            return new ResponseEntity(HttpStatus.OK);
+            Cache cache = cacheManager.getCache(cacheName);
+
+            Set<String> range = namedCacheValues(cacheName);
+
+            range.stream().forEach(v -> cache.evict(v));
+
+            return new ResponseEntity(range.size(), HttpStatus.OK);
         }
 
     }
