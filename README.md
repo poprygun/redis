@@ -1,5 +1,10 @@
 # Demo Spring Boot / Redis configurations
 
+## Steps to experiment
+1. http://localhost:8080 Should list and cache data.
+2. List cached data in http://localhost:8080/cached
+3. Purge cache with http://localhost:8080/purge
+
 `CacheConfiguration` class defines methods for Cache Manager and Key Generator.
 
 Use of `@Cacheable` puts entries to redis that define cache keys for namespace `months~keys`
