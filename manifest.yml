@@ -1,0 +1,8 @@
+---
+applications:
+- name: redis-example
+  memory: 768M
+  path: target/redis.jar
+  buildpack: https://github.com/cloudfoundry/java-buildpack.git
+  services:
+  - redis-cache

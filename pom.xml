@@ -22,6 +22,7 @@
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 		<java.version>1.8</java.version>
+		<cloud.connectors.version>1.2.3.RELEASE</cloud.connectors.version>
 	</properties>
 
 	<dependencies>
@@ -49,9 +50,20 @@
 			<version>0.7.1</version>
 			<scope>test</scope>
 		</dependency>
+		<dependency>
+			<groupId>org.springframework.cloud</groupId>
+			<artifactId>spring-cloud-spring-service-connector</artifactId>
+			<version>${cloud.connectors.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.cloud</groupId>
+			<artifactId>spring-cloud-cloudfoundry-connector</artifactId>
+			<version>${cloud.connectors.version}</version>
+		</dependency>
 	</dependencies>
 
 	<build>
+		<finalName>redis</finalName>
 		<plugins>
 			<plugin>
 				<groupId>org.springframework.boot</groupId>
