@@ -1,9 +1,11 @@
 # Demo Spring Boot / Redis configurations
 
+## Uses https://github.com/poprygun/cache-admin as autoconfiguration for `purge` and `show cache`
+
 ## Steps to experiment
 1. http://localhost:8080/mohths and http://localhost:8080/days Should list and cache data.
-2. List cached data in http://localhost:8080/cached?cacheName=days and http://localhost:8080/cached?cacheName=months
-3. Purge cache with http://localhost:8080/purge?cacheName=months and http://localhost:8080/purge?cacheName=days
+2. List cached data in http://localhost:8080/cache-admin/cached?cacheName=days and http://localhost:8080/cached?cacheName=months
+3. Purge cache with http://localhost:8080/cache-admin/purge?cacheName=months and http://localhost:8080/purge?cacheName=days
 
 `CacheConfiguration` class defines methods for Cache Manager and Key Generator.
 
