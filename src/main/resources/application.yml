@@ -4,10 +4,11 @@ spring:
     port: 6379
   cache:
     cache-names: days,months
+  autoconfigure:
+    exclude: io.microsamples.cache.admin.config.CacheAdminAutoConfiguration
 management:
   security:
     enabled: false
-
 
 
 
