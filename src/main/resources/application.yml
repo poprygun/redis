@@ -9,7 +9,8 @@ spring:
 management:
   security:
     enabled: false
-
-
-
+cache:
+  specs:
+    days: 30
+    months: 850
 
